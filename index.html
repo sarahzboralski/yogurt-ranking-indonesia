@@ -1,0 +1,415 @@
+# yogurt-ranking-indonesia
+Greek yogurt nutrition ranking dashboard
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Greek Yogurt Face-Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --milk:#FBFAF6;
+    --ink:#19232E;
+    --slate:#5A6B78;
+    --line:#E6E2D8;
+    --blue:#2F6FB0;
+    --blue-soft:#DDEAF5;
+    --green:#3B9B6C;
+    --green-soft:#DFF0E7;
+    --amber:#C7623B;
+    --amber-soft:#F6E4DB;
+    --gold:#C79A2E;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--milk);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    padding:clamp(16px,4vw,48px);
+  }
+  .wrap{max-width:1080px;margin:0 auto}
+
+  /* ---- Header ---- */
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--blue);margin-bottom:14px;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;font-weight:900;
+    font-size:clamp(34px,7vw,68px);line-height:.94;letter-spacing:-.02em;
+    text-transform:uppercase;
+  }
+  h1 .thin{font-weight:600;color:var(--slate)}
+  .sub{
+    margin-top:16px;max-width:60ch;color:var(--slate);font-size:15px;
+  }
+  .meta{
+    margin-top:18px;display:flex;flex-wrap:wrap;gap:8px 20px;
+    font-family:'Space Mono',monospace;font-size:12px;color:var(--slate);
+  }
+  .meta b{color:var(--ink)}
+
+  .rule{height:2px;background:var(--ink);margin:28px 0}
+
+  /* ---- Mode toggle ---- */
+  .modes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px}
+  .modes .lbl{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-right:4px}
+  .mode-btn{
+    font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;
+    border:1.5px solid var(--ink);background:transparent;color:var(--ink);
+    padding:9px 16px;border-radius:2px;cursor:pointer;transition:.15s;
+    letter-spacing:.01em;
+  }
+  .mode-btn:hover{background:var(--blue-soft)}
+  .mode-btn.on{background:var(--ink);color:var(--milk)}
+  .mode-note{margin:14px 0 26px;font-size:14px;color:var(--slate);min-height:20px}
+  .mode-note b{color:var(--ink)}
+
+  /* ---- Podium / ranked list ---- */
+  .rank{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+  .row{
+    display:grid;grid-template-columns:52px 1fr;gap:16px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:6px;
+    padding:14px 18px;transition:.25s;position:relative;overflow:hidden;
+  }
+  .row.win{border-color:var(--gold);box-shadow:0 2px 0 var(--gold)}
+  .medal{
+    font-family:'Archivo',sans-serif;font-weight:900;font-size:26px;
+    text-align:center;color:var(--slate);line-height:1;
+  }
+  .row.top1 .medal{color:var(--gold)}
+  .row.top2 .medal{color:#9BA7AE}
+  .row.top3 .medal{color:var(--amber)}
+  .rmain{min-width:0}
+  .rtop{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px}
+  .name{font-family:'Archivo',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.01em}
+  .tag{
+    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;padding:2px 7px;border-radius:2px;color:#fff;white-space:nowrap;
+  }
+  .tag.blue{background:var(--blue)} .tag.green{background:var(--green)}
+  .tag.amber{background:var(--amber)} .tag.grey{background:#8B97A0}
+  .price{margin-left:auto;font-family:'Space Mono',monospace;font-size:13px;color:var(--ink);white-space:nowrap}
+  .price small{color:var(--slate)}
+  .bar-track{margin-top:10px;height:9px;background:var(--milk);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:20px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .rstat{margin-top:8px;font-size:12.5px;color:var(--slate);font-family:'Space Mono',monospace}
+  .rstat b{color:var(--ink)}
+  .scorepill{font-family:'Space Mono',monospace;font-size:12px;color:var(--slate)}
+
+  /* ---- Data table ---- */
+  .section-h{font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);margin:38px 0 4px}
+  .section-sub{font-size:13px;color:var(--slate);margin-bottom:16px}
+  .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:6px;background:var(--card)}
+  table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+  thead th{
+    font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--slate);font-weight:700;text-align:right;padding:14px 12px;border-bottom:2px solid var(--ink);
+    white-space:nowrap;cursor:pointer;user-select:none;
+  }
+  thead th:first-child{text-align:left}
+  thead th:hover{color:var(--blue)}
+  thead th .arrow{opacity:.4;font-size:9px}
+  thead th.sorted{color:var(--blue)}
+  thead th.sorted .arrow{opacity:1}
+  tbody td{padding:12px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+  tbody td:first-child{text-align:left;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:#FCFBF8}
+  .cell{position:relative;display:inline-block}
+  .best{color:var(--green);font-weight:700}
+  .worst{color:var(--amber);font-weight:700}
+  .u{color:#A9B2B8;font-style:italic}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:5px;vertical-align:middle}
+  .dot.g{background:var(--green)} .dot.a{background:var(--amber)}
+
+  /* ---- Verdict cards ---- */
+  .verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:20px}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;border-top:4px solid var(--blue)}
+  .vcard.g{border-top-color:var(--green)}
+  .vcard.a{border-top-color:var(--amber)}
+  .vcard .goal{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);margin-bottom:8px}
+  .vcard .pick{font-family:'Archivo',sans-serif;font-weight:900;font-size:22px;letter-spacing:-.01em;margin-bottom:8px}
+  .vcard p{font-size:13px;color:var(--slate);line-height:1.55}
+
+  /* ---- Footnotes ---- */
+  .notes{margin-top:34px;padding-top:22px;border-top:2px solid var(--ink)}
+  .notes h3{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-bottom:12px}
+  .notes ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .notes li{font-size:13px;color:var(--slate);padding-left:22px;position:relative;line-height:1.5}
+  .notes li::before{content:"→";position:absolute;left:0;color:var(--blue);font-weight:700}
+  .notes b{color:var(--ink)}
+  .foot{margin-top:26px;font-family:'Space Mono',monospace;font-size:11px;color:#A9B2B8;letter-spacing:.04em}
+
+  @media(max-width:560px){
+    .row{grid-template-columns:40px 1fr;gap:12px;padding:12px 14px}
+    .medal{font-size:21px}
+    .price{width:100%;margin-left:0;margin-top:2px}
+    .rtop{gap:6px 8px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Nutrition Almanac · Indonesia · per 100 g/ml</div>
+    <h1>Greek Yogurt<br><span class="thin">Face-Off</span></h1>
+    <p class="sub">Seven strained-style tubs, every label read off the pot and normalized to 100 g. Pick the goal that matches yours — the ranking re-sorts to fit.</p>
+    <div class="meta">
+      <span><b>7</b> contenders</span>
+      <span><b>8</b> metrics tracked</span>
+      <span>Prices in <b>IDR</b></span>
+      <span>Tap column headers to sort</span>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <div class="modes">
+    <span class="lbl">Rank for:</span>
+    <button class="mode-btn on" data-mode="diet">Weight-loss diet</button>
+    <button class="mode-btn" data-mode="gut">Gut &amp; clean label</button>
+    <button class="mode-btn" data-mode="protein">High protein</button>
+  </div>
+  <div class="mode-note" id="modeNote"></div>
+
+  <div class="rank" id="rank"></div>
+
+  <div class="section-h">The full data grid</div>
+  <div class="section-sub">Green = best in column · amber = worst · <span class="u">italic grey = not stated on label</span>. Sugar figures note added vs natural where the label breaks it out.</div>
+  <div class="tbl-scroll">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th data-k="name" class="sorted">Yogurt <span class="arrow">▲</span></th>
+          <th data-k="cal">Cal <span class="arrow">↕</span></th>
+          <th data-k="fat">Fat g <span class="arrow">↕</span></th>
+          <th data-k="sugar">Sugar g <span class="arrow">↕</span></th>
+          <th data-k="protein">Protein g <span class="arrow">↕</span></th>
+          <th data-k="strains">Cultures <span class="arrow">↕</span></th>
+          <th data-k="additives">Additives <span class="arrow">↕</span></th>
+          <th data-k="price">Rp/100g <span class="arrow">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="section-h">The verdict, three ways</div>
+  <div class="section-sub">No single winner — it depends entirely on what you're optimizing for.</div>
+  <div class="verdicts">
+    <div class="vcard a">
+      <div class="goal">Cheapest calorie-cut</div>
+      <div class="pick">Cimory Low Fat</div>
+      <p>Lowest calories (80) and fat (1 g), cheapest per gram, no added sugar. Trade-off: only starter cultures and a little modified starch. The <b>Normal</b> Cimory is a different tub — 14 g sugar — don't grab it by mistake.</p>
+    </div>
+    <div class="vcard g">
+      <div class="goal">Gut health &amp; clean</div>
+      <div class="pick">Biokul</div>
+      <p>100% yogurt, nothing added, plus real probiotics (<i>L. acidophilus</i> + <i>Bifidobacterium</i>). The cleanest everyday label. Trade-off: highest calories (130) and full fat.</p>
+    </div>
+    <div class="vcard">
+      <div class="goal">Best macros, price no object</div>
+      <div class="pick">Hao Greek Protein</div>
+      <p>16 g protein and 0 g sugar per 100 g, five live strains, protein isolate, no preservatives. A tier above on nutrition — but ~3× the price of Cimory.</p>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Read the fine print</h3>
+    <ul>
+      <li><b>Cimory has two look-alike tubs.</b> Low Fat = 80 cal / 1 g fat / 6 g sugar (0 added). Normal = 120 cal / 4 g fat / 14 g sugar (6 g added sucrose). Same shelf, very different diet math.</li>
+      <li><b>"Sugar" isn't all equal.</b> Cimory Low Fat, Heavenly Blush, Biokul and both Hao tubs carry no added sugar — their sugar is natural milk lactose. Yummy and Cimory Normal list sugar as an ingredient.</li>
+      <li><b>Yummy's high protein is partly built.</b> It adds milk protein concentrate, modified starch and bovine gelatin, so the 7 g isn't purely from straining.</li>
+      <li><b>Hao Plain's cultures aren't printed</b> on the panel shown, so it's marked unknown for the gut ranking. Its 0 g sugar / 0 g carb points to a genuinely strained yogurt.</li>
+      <li><b>Heavenly Blush uses beef gelatin;</b> Yummy uses bovine gelatin — worth knowing for halal/dietary reasons (both carry local certification marks).</li>
+    </ul>
+  </div>
+
+  <div class="foot">Built from your label photos · figures normalized to 100 g/ml · not medical advice</div>
+</div>
+
+<script>
+const DATA = [
+  // sugar: total g/100g ; added: g added sugar/100g ; addedKnown: label declares breakdown
+  // strains: total listed cultures ; probiotic: count beyond the 2 starters ; strainsKnown
+  // additives: count of non-yogurt ingredients (thickeners/sweeteners/preservatives/flavors)
+  {name:"Hao Greek Protein", cal:120, fat:6.2, sugar:0, added:0, addedKnown:true, protein:16.4, strains:5, probiotic:3, strainsKnown:true, additives:1, addNote:"protein isolate", price:32300, sugarNote:"0 g"},
+  {name:"Hao Greek Plain",   cal:90,  fat:7.5, sugar:0, added:0, addedKnown:true, protein:7,   strains:0, probiotic:0, strainsKnown:false, additives:0, addNote:"none listed", price:24800, sugarNote:"0 g"},
+  {name:"Cimory Low Fat",    cal:80,  fat:1,   sugar:6, added:0, addedKnown:true, protein:5,   strains:2, probiotic:0, strainsKnown:true, additives:1, addNote:"modified starch", price:10125, sugarNote:"6 g (0 added)"},
+  {name:"Cimory Normal",     cal:120, fat:4,   sugar:14, added:6, addedKnown:true, protein:5,  strains:2, probiotic:0, strainsKnown:true, additives:3, addNote:"starch, synthetic flavor, preservative", price:10125, sugarNote:"14 g (6 added)"},
+  {name:"Yummy Greek",       cal:110, fat:2.5, sugar:8, added:4, addedKnown:false, protein:7,  strains:3, probiotic:2, strainsKnown:true, additives:4, addNote:"sugar, starch, gelatin, protein conc.", price:13780, sugarNote:"8 g (some added)"},
+  {name:"Heavenly Blush",    cal:112.5, fat:7.5, sugar:3.75, added:0, addedKnown:true, protein:5, strains:2, probiotic:0, strainsKnown:true, additives:1, addNote:"beef gelatin", price:12850, sugarNote:"3.8 g (0 added)"},
+  {name:"Biokul",            cal:130, fat:7,   sugar:4, added:0, addedKnown:true, protein:6,   strains:4, probiotic:2, strainsKnown:true, additives:0, addNote:"none — 100% yogurt", price:15010, sugarNote:"4 g (0 added)"},
+];
+
+const MODES = {
+  diet: {
+    note:"Rewards <b>low calories, fat, sugar and price</b>, with a nod to protein for staying power. This is the pure weight-loss lens.",
+    color:"var(--amber)",
+    weights:{cal:.28, fat:.14, sugar:.20, added:.10, price:.18, protein:.10},
+  },
+  gut: {
+    note:"Rewards <b>more live strains, fewer additives and no added sugar</b> — a whole-food, gut-first lens where fat and calories barely matter.",
+    color:"var(--green)",
+    weights:{strains:.40, additives:.30, added:.20, price:.10},
+  },
+  protein: {
+    note:"Rewards <b>protein density and low sugar</b>, with credit for live cultures — the body-composition / satiety lens.",
+    color:"var(--blue)",
+    weights:{protein:.45, sugar:.20, strains:.15, cal:.10, price:.10},
+  }
+};
+
+// lower-is-better metrics
+const LOWER = new Set(["cal","fat","sugar","added","price","additives"]);
+
+function norm(key){
+  const vals = DATA.map(d=>d[key]);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  return v => max===min ? .5 : (v-min)/(max-min);
+}
+
+function score(d, mode){
+  const w = MODES[mode].weights;
+  let s=0, tot=0;
+  for(const k in w){
+    let raw;
+    // handle unknowns: Hao Plain strains -> neutral 0.5
+    if(k==="strains" && !d.strainsKnown){ raw=0.5; }
+    else {
+      const n = norm(k)(d[k]);
+      raw = LOWER.has(k) ? 1-n : n;
+    }
+    s += raw*w[k]; tot += w[k];
+  }
+  return s/tot; // 0..1
+}
+
+let currentMode="diet";
+let sortKey=null, sortDir=1;
+
+const rankEl=document.getElementById('rank');
+const noteEl=document.getElementById('modeNote');
+const tbody=document.getElementById('tbody');
+
+function bestWorst(key){
+  const vals=DATA.map(d=>d[key]);
+  const min=Math.min(...vals),max=Math.max(...vals);
+  return LOWER.has(key) ? {best:min,worst:max} : {best:max,worst:min};
+}
+
+function renderRank(){
+  const mode=MODES[currentMode];
+  noteEl.innerHTML=mode.note;
+  const scored=DATA.map(d=>({d,s:score(d,currentMode)})).sort((a,b)=>b.s-a.s);
+  const medals=["1","2","3","4","5","6","7"];
+  rankEl.innerHTML=scored.map((row,i)=>{
+    const d=row.d, pct=Math.round(row.s*100);
+    const topClass=i===0?"top1 win":i===1?"top2":i===2?"top3":"";
+    const medalTxt = i<3 ? ["①","②","③"][i] : medals[i];
+    // tags
+    let tags="";
+    if(d.probiotic>0) tags+=`<span class="tag green">${d.strains} strains · probiotic</span>`;
+    else if(d.strainsKnown) tags+=`<span class="tag grey">${d.strains} starters only</span>`;
+    else tags+=`<span class="tag grey">cultures n/a</span>`;
+    if(d.added>0) tags+=`<span class="tag amber">added sugar</span>`;
+    else if(d.sugar===0) tags+=`<span class="tag blue">0 g sugar</span>`;
+    const fill = i===0?"var(--gold)": mode.color;
+    return `<div class="row ${topClass}">
+      <div class="medal">${medalTxt}</div>
+      <div class="rmain">
+        <div class="rtop">
+          <span class="name">${d.name}</span>
+          ${tags}
+          <span class="price">Rp ${d.price.toLocaleString('en-US')}<small>/100g</small></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${fill}"></div></div>
+        <div class="rstat"><b>${d.cal}</b> cal · <b>${d.fat}</b>g fat · <b>${d.sugarNote}</b> · <b>${d.protein}</b>g protein <span class="scorepill">· fit ${pct}/100</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmt(d,key){
+  const bw=bestWorst(key);
+  const cls = d[key]===bw.best ? "best" : d[key]===bw.worst ? "worst" : "";
+  if(key==="cal") return `<span class="${cls}">${d.cal}</span>`;
+  if(key==="fat") return `<span class="${cls}">${d.fat}</span>`;
+  if(key==="protein") return `<span class="${cls}">${d.protein}</span>`;
+  if(key==="price") return `<span class="${cls}">${(d.price/1000).toFixed(1)}k</span>`;
+  return `<span class="${cls}">${d[key]}</span>`;
+}
+
+function renderTable(){
+  let rows=[...DATA];
+  if(sortKey){
+    rows.sort((a,b)=>{
+      if(sortKey==="name") return sortDir*a.name.localeCompare(b.name);
+      return sortDir*(a[sortKey]-b[sortKey]);
+    });
+  }
+  tbody.innerHTML=rows.map(d=>{
+    // sugar cell with note
+    const sbw=bestWorst("sugar");
+    const scls=d.sugar===sbw.best?"best":d.sugar===sbw.worst?"worst":"";
+    // strains cell
+    let strainCell;
+    if(!d.strainsKnown) strainCell=`<span class="u">n/a</span>`;
+    else{
+      const dot = d.probiotic>0?`<span class="dot g" title="has probiotics"></span>`:`<span class="dot a" title="starters only"></span>`;
+      strainCell=`${d.strains}${dot}`;
+    }
+    // additives
+    const abw=bestWorst("additives");
+    const acls=d.additives===abw.best?"best":d.additives===abw.worst?"worst":"";
+    return `<tr>
+      <td>${d.name}</td>
+      <td>${fmt(d,"cal")}</td>
+      <td>${fmt(d,"fat")}</td>
+      <td><span class="${scls}">${d.sugar}</span></td>
+      <td>${fmt(d,"protein")}</td>
+      <td>${strainCell}</td>
+      <td><span class="${acls}">${d.additives}</span></td>
+      <td>${fmt(d,"price")}</td>
+    </tr>`;
+  }).join('');
+}
+
+// mode buttons
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    currentMode=btn.dataset.mode;
+    renderRank();
+  });
+});
+
+// sortable headers
+document.querySelectorAll('#tbl thead th').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const k=th.dataset.k;
+    if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir = k==="name"?1:1;}
+    document.querySelectorAll('#tbl thead th').forEach(h=>{h.classList.remove('sorted');const a=h.querySelector('.arrow');if(a)a.textContent='↕';});
+    th.classList.add('sorted');
+    const arrow=th.querySelector('.arrow');
+    if(arrow) arrow.textContent = sortDir===1 ? '▲' : '▼';
+    renderTable();
+  });
+});
+
+renderRank();
+renderTable();
+</script>
+</body>
+</html>
